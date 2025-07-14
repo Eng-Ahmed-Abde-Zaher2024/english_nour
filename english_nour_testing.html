@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تعلم الكتابة الإنجليزية</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        text-align: center;
+        padding: 20px;
+        direction: ltr;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 50px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 30px;
+      }
+
+      .word-display {
+        font-size: 36px;
+        margin-bottom: 15px;
+        color: #3498db;
+        font-weight: bold;
+      }
+
+      .hint {
+        font-size: 16px;
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .pronunciation {
+        font-size: 16px;
+        color: #7f8c8d;
+        margin-bottom: 20px;
+        font-style: italic;
+      }
+
+      .cells-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .cell-row {
+        display: flex;
+        transition: all 0.3s;
+      }
+
+      .cell-row.completed {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+
+      .cell {
+        width: 60px;
+        height: 60px;
+        border: 1px solid #969696;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 45px;
+        font-weight: bold;
+        color: transparent;
+        position: relative;
+        transition: all 0.3s;
+      }
+
+      .cell.hint-char {
+        color: #bdc3c7;
+      }
+
+      .cell.active {
+        border-color: #3498db;
+        background-color: #f0f8ff;
+      }
+
+      .cell.correct {
+        color: #2ecc71;
+        border-color: #2ecc71;
+        background-color: #e8f8f0;
+      }
+
+      .cell.incorrect {
+        color: #e74c3c;
+        border-color: #e74c3c;
+        background-color: #fdedec;
+      }
+
+      .progress {
+        margin-bottom: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 18px;
+      }
+
+      .next-btn {
+        display: none;
+      }
+
+      .success-message {
+        color: #2ecc71;
+        font-weight: bold;
+        margin: 15px 0;
+        height: 20px;
+        font-size: 16px;
+      }
+
+      .file-input-container {
+        margin: 20px 0;
+        padding: 15px;
+        border: 2px dashed #bdc3c7;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+      }
+
+      .file-input-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .custom-file-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-block;
+        transition: background-color 0.3s;
+      }
+
+      .custom-file-btn:hover {
+        background-color: #2980b9;
+      }
+
+      .file-name {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #7f8c8d;
+      }
+
+      .instructions {
+        text-align: right;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #e8f4f8;
+        border-radius: 5px;
+        border-right: 4px solid #3498db;
+        direction: rtl;
+      }
+
+      .instructions h3 {
+        margin-top: 0;
+        color: #2c3e50;
+      }
+
+      .instructions ol {
+        padding-right: 20px;
+      }
+
+      .word_contaner {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+      }
+      footer {
+        background: linear-gradient(90deg, #4caf50, #2e7d32); /* أخضر متدرج */
+        color: white;
+        text-align: center;
+        padding: 12px;
+        font-size: 16px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+      }
+
+      footer .check {
+        margin-left: 6px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+    </style>
+    <script src="jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>تعلم الكتابة الإنجليزية</h1>
+
+      <div class="instructions">
+        <h3>كيفية الاستخدام:</h3>
+        <ol>
+          <li>قم بتحميل ملف Excel يحتوي على الكلمات (اختياري)</li>
+          <li>اكتب كل كلمة 10 مرات كما تظهر</li>
+          <li>الحروف الصحيحة تظهر باللون الأخضر</li>
+          <li>بعد إكمال 10 مرات، انتقل للكلمة التالية</li>
+        </ol>
+      </div>
+
+      <div class="file-input-container">
+        <label class="file-input-label">تحميل ملف Excel بالكلمات:</label>
+        <label for="excel-file" class="custom-file-btn">اختر ملف</label>
+        <input
+          type="file"
+          id="excel-file"
+          class="file-input"
+          accept=".xlsx, .xls" />
+        <br />
+        <br />
+        <button id="repeted_number">++ROW</button>
+        <div class="file-name">لم يتم اختيار ملف</div>
+      </div>
+
+      <div class="word_contaner">
+        <div class="progress">كلمة 1 من 0</div>
+        <div class="word-display">---</div>
+      </div>
+      <div class="hint">تلميح: ---</div>
+      <div class="pronunciation">نطق: ---</div>
+
+      <div class="success-message"></div>
+
+      <div class="cells-container">
+        <!-- سيتم إضافة الصفوف عبر jQuery -->
+      </div>
+    </div>
+    <script src="scrip.js"></script>
+    <footer>✅ <span>تم بحمد الله</span></footer>
+  </body>
+</html>
