@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تعلم الكتابة الإنجليزية</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        text-align: center;
+        padding: 20px;
+        direction: ltr;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 50px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 30px;
+      }
+
+      .word-display {
+        font-size: 36px;
+        margin-bottom: 15px;
+        color: #3498db;
+        font-weight: bold;
+      }
+
+      .hint {
+        font-size: 16px;
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .pronunciation {
+        font-size: 16px;
+        color: #7f8c8d;
+        margin-bottom: 20px;
+        font-style: italic;
+      }
+
+      .cells-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .cell-row {
+        display: flex;
+        transition: all 0.3s;
+      }
+
+      .cell-row.completed {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+
+      .cell {
+        width: 60px;
+        height: 60px;
+        border: 1px solid #969696;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 45px;
+        font-weight: bold;
+        color: transparent;
+        position: relative;
+        transition: all 0.3s;
+      }
+
+      .cell.hint-char {
+        color: #bdc3c7;
+      }
+
+      .cell.active {
+        border-color: #3498db;
+        background-color: #f0f8ff;
+      }
+
+      .cell.correct {
+        color: #2ecc71;
+        border-color: #2ecc71;
+        background-color: #e8f8f0;
+      }
+
+      .cell.incorrect {
+        color: #e74c3c;
+        border-color: #e74c3c;
+        background-color: #fdedec;
+      }
+
+      .progress {
+        margin-bottom: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 18px;
+      }
+
+      .next-btn {
+        display: none;
+      }
+
+      .success-message {
+        color: #2ecc71;
+        font-weight: bold;
+        margin: 15px 0;
+        height: 20px;
+        font-size: 16px;
+      }
+
+      .file-input-container {
+        margin: 20px 0;
+        padding: 15px;
+        border: 2px dashed #bdc3c7;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+      }
+
+      .file-input-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .custom-file-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-block;
+        transition: background-color 0.3s;
+      }
+
+      .custom-file-btn:hover {
+        background-color: #2980b9;
+      }
+
+      .file-name {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #7f8c8d;
+      }
+
+      .instructions {
+        text-align: right;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #e8f4f8;
+        border-radius: 5px;
+        border-right: 4px solid #3498db;
+        direction: rtl;
+      }
+
+      .instructions h3 {
+        margin-top: 0;
+        color: #2c3e50;
+      }
+
+      .instructions ol {
+        padding-right: 20px;
+      }
+
+      .word_contaner {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+      }
+      footer {
+        background: linear-gradient(90deg, #4caf50, #2e7d32); /* أخضر متدرج */
+        color: white;
+        text-align: center;
+        padding: 12px;
+        font-size: 16px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+      }
+
+      footer .check {
+        margin-left: 6px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+    </style>
+    <script src="jquery-3.6.0.min.js"></script> 
+  </head>
+  <body>
+    <div class="container">
+      <h1>تعلم الكتابة الإنجليزية</h1>
+
+      <div class="instructions">
+        <h3>كيفية الاستخدام:</h3>
+        <ol>
+          <li>قم بتحميل ملف Excel يحتوي على الكلمات (اختياري)</li>
+          <li>اكتب كل كلمة 10 مرات كما تظهر</li>
+          <li>الحروف الصحيحة تظهر باللون الأخضر</li>
+          <li>بعد إكمال 10 مرات، انتقل للكلمة التالية</li>
+        </ol>
+      </div>
+
+      <div class="file-input-container">
+        <label class="file-input-label">تحميل ملف Excel بالكلمات:</label>
+        <label for="excel-file" class="custom-file-btn">اختر ملف</label>
+        <input
+          type="file"
+          id="excel-file"
+          class="file-input"
+          accept=".xlsx, .xls" />
+        <br />
+        <br />
+        <button id="repeted_number">++ROW</button>
+        <div class="file-name">لم يتم اختيار ملف</div>
+      </div>
+
+      <div class="word_contaner">
+        <div class="progress">كلمة 1 من 0</div>
+        <div class="word-display">---</div>
+      </div>
+      <div class="hint">تلميح: ---</div>
+      <div class="pronunciation">نطق: ---</div>
+
+      <div class="success-message"></div>
+
+      <div class="cells-container">
+        <!-- سيتم إضافة الصفوف عبر jQuery -->
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        let row_number = 1;
+        function row_number_fun() {
+          row_number = prompt('enter row number your need repeted :', 5);
+          console.log(row_number);
+        }
+
+        console.log(row_number);
+        let currentWordIndex = 0;
+        let currentAttempt = 0;
+        let maxAttempts = row_number;
+        let currentPosition = 0;
+        let currentWord = '';
+        let completedRows = 0;
+
+        $('#repeted_number').on('click', function () {
+          const input = prompt('أدخل عدد المحاولات التي تريدها:', row_number);
+          const newNumber = parseInt(input);
+
+          if (!isNaN(newNumber) && newNumber > 0) {
+            row_number = newNumber;
+            maxAttempts = row_number;
+            currentAttempt = 0;
+            completedRows = 0;
+            initWord(); // 🔁 إعادة بناء الكلمة بعد تغيير عدد المحاولات
+          } else {
+            alert('الرجاء إدخال رقم صحيح أكبر من 0.');
+          }
+        });
+
+        let words = [
+          { word: 'we', hint: 'نحن', pronunciation: 'وي' },
+          { word: 'need', hint: 'نحتاج', pronunciation: 'نيد' },
+          { word: 'your', hint: 'خاصتك / الخاص بكم', pronunciation: 'يور' },
+          { word: 'usual', hint: 'المعتاد', pronunciation: 'يوجوال' },
+          { word: 'support', hint: 'دعم', pronunciation: 'سبورت' },
+          { word: 'to', hint: 'أن / إلى', pronunciation: 'تو' },
+          { word: 'adjust', hint: 'تعديل', pronunciation: 'أدجست' },
+          { word: 'the', hint: 'الـ', pronunciation: 'ذَ' },
+          { word: 'way', hint: 'طريقة', pronunciation: 'واي' },
+          { word: 'of', hint: 'من / لـ', pronunciation: 'أُف' },
+          { word: 'choosing', hint: 'اختيار', pronunciation: 'تشوزنج' },
+          { word: 'time', hint: 'وقت', pronunciation: 'تايم' },
+          { word: 'in', hint: 'في', pronunciation: 'إن' },
+          { word: 'own', hint: 'خاص / تملك', pronunciation: 'أون' },
+          { word: 'case', hint: 'الحالة / البلاغ', pronunciation: 'كيس' },
+          { word: 'part', hint: 'جزء', pronunciation: 'بارت' },
+          { word: 'after', hint: 'بعد', pronunciation: 'آفتر' },
+          { word: 'date', hint: 'تاريخ', pronunciation: 'ديت' },
+          { word: 'same', hint: 'نفس / مشابه', pronunciation: 'سايم' },
+          { word: 'as', hint: 'كما / مثل', pronunciation: 'آز' },
+          { word: 'follow', hint: 'يتبع', pronunciation: 'فولو' },
+          { word: 'process', hint: 'عملية', pronunciation: 'بروسس' },
+          { word: 'some', hint: 'بعض', pronunciation: 'سَم' },
+          { word: 'agents', hint: 'وكلاء', pronunciation: 'آيجنتس' },
+          { word: 'only', hint: 'فقط', pronunciation: 'أونلي' },
+          { word: 'being', hint: 'يتم', pronunciation: 'بيينج' },
+          {
+            word: 'entered',
+            hint: 'يُدخل / تم إدخاله',
+            pronunciation: 'إنترَد',
+          },
+          { word: 'by', hint: 'بواسطة', pronunciation: 'باي' },
+          { word: 'default', hint: 'افتراضي', pronunciation: 'دفولت' },
+          { word: 'which', hint: 'والذي', pronunciation: 'ويتش' },
+          { word: 'leads', hint: 'يؤدي إلى', pronunciation: 'ليدز' },
+          { word: 'wrong', hint: 'خاطئ', pronunciation: 'رونج' },
+          { word: 'followup', hint: 'متابعة', pronunciation: 'فولو أب' },
+          { word: 'would', hint: 'سوف / من الأفضل أن', pronunciation: 'وُد' },
+          {
+            word: 'appreciate',
+            hint: 'نقدّر / نكون ممتنين',
+            pronunciation: 'أبريشيت',
+          },
+          { word: 'preventing', hint: 'منع', pronunciation: 'بريفنتنج' },
+          { word: 'problem', hint: 'مشكلة', pronunciation: 'برابلم' },
+          { word: 'status', hint: 'حالة', pronunciation: 'ستاتَس' },
+          { word: 'anything', hint: 'أي شيء', pronunciation: 'أنيثنج' },
+          { word: 'but', hint: 'إلا / لكن', pronunciation: 'بت' },
+          { word: 'pending', hint: 'قيد الانتظار', pronunciation: 'بندنج' },
+          { word: 'during', hint: 'أثناء', pronunciation: 'ديورنج' },
+          { word: 'as', hint: 'كما / لأن', pronunciation: 'آز' },
+          { word: 'in', hint: 'في', pronunciation: 'إن' },
+          {
+            word: 'FTTH',
+            hint: 'فايبر إلى المنزل',
+            pronunciation: 'إف تي تي إتش',
+          },
+          { word: 'are', hint: 'يكونون', pronunciation: 'آر' },
+          { word: 'able', hint: 'قادرون على', pronunciation: 'إيبل' },
+          { word: 'it', hint: 'ذلك / هو', pronunciation: 'إت' },
+          {
+            word: 'reassigned',
+            hint: 'أُعيد تعيينه',
+            pronunciation: 'ري أسايند',
+          },
+          { word: 'so', hint: 'لذلك', pronunciation: 'سو' },
+          { word: 'should', hint: 'ينبغي', pronunciation: 'شود' },
+          { word: 'be', hint: 'يكون', pronunciation: 'بي' },
+          { word: 'unless', hint: 'ما لم', pronunciation: 'أنلس' },
+          { word: 'first', hint: 'أول', pronunciation: 'فيرست' },
+          { word: 'second', hint: 'ثاني', pronunciation: 'ساكند' },
+          { word: 'set', hint: 'تم تعيينه', pronunciation: 'سِت' },
+          { word: 'handled', hint: 'تم التعامل معه', pronunciation: 'هاندلد' },
+          { word: 'agreed', hint: 'تم الاتفاق عليه', pronunciation: 'أجريد' },
+          { word: 'then', hint: 'ثم', pronunciation: 'ذِن' },
+          { word: 'can', hint: 'يمكن', pronunciation: 'كان' },
+          { word: 'any', hint: 'أي', pronunciation: 'آني' },
+          { word: 'other', hint: 'آخر', pronunciation: 'أذر' },
+
+          { word: 'meeting', hint: 'اجتماع', pronunciation: 'ميتينج' },
+          { word: 'agenda', hint: 'جدول أعمال', pronunciation: 'أجيندا' },
+          { word: 'participant', hint: 'مشارك', pronunciation: 'بارتيسيبانت' },
+          {
+            word: 'chairperson',
+            hint: 'رئيس الاجتماع',
+            pronunciation: 'تشيربرسون',
+          },
+          { word: 'minutes', hint: 'محضر الاجتماع', pronunciation: 'منيتس' },
+          { word: 'objective', hint: 'هدف', pronunciation: 'أوبجكتيف' },
+          { word: 'discussion', hint: 'مناقشة', pronunciation: 'ديسكاشن' },
+          { word: 'proposal', hint: 'اقتراح', pronunciation: 'بروبوزال' },
+          { word: 'vote', hint: 'تصويت', pronunciation: 'فوت' },
+          { word: 'consensus', hint: 'إجماع', pronunciation: 'كونسنسس' },
+          { word: 'client', hint: 'عميل', pronunciation: 'كلاينت' },
+          { word: 'customer', hint: 'زبون', pronunciation: 'كاستومر' },
+          { word: 'contract', hint: 'عقد', pronunciation: 'كونتراكت' },
+          { word: 'negotiation', hint: 'تفاوض', pronunciation: 'نيجوشييشن' },
+          { word: 'agreement', hint: 'اتفاقية', pronunciation: 'أجريمنت' },
+          { word: 'partnership', hint: 'شراكة', pronunciation: 'بارتنرشيب' },
+          { word: 'deadline', hint: 'موعد نهائي', pronunciation: 'ديدلاين' },
+          { word: 'delivery', hint: 'تسليم', pronunciation: 'ديلفري' },
+          { word: 'invoice', hint: 'فاتورة', pronunciation: 'إنفويز' },
+          { word: 'payment', hint: 'دفع', pronunciation: 'بيمنت' },
+          {
+            word: 'presentation',
+            hint: 'عرض تقديمي',
+            pronunciation: 'بريزينتيشن',
+          },
+          { word: 'slide', hint: 'شريحة', pronunciation: 'سلايد' },
+          { word: 'audience', hint: 'جمهور', pronunciation: 'أودينس' },
+          { word: 'speaker', hint: 'متحدث', pronunciation: 'سبيكر' },
+          { word: 'handout', hint: 'نشرة', pronunciation: 'هاندآوت' },
+          { word: 'q&a', hint: 'أسئلة وأجوبة', pronunciation: 'كيو أند إي' },
+          { word: 'feedback', hint: 'تغذية راجعة', pronunciation: 'فيدباك' },
+          { word: 'performance', hint: 'أداء', pronunciation: 'بيرفورمانس' },
+          { word: 'statistics', hint: 'إحصائيات', pronunciation: 'ستاتيستيكس' },
+          { word: 'chart', hint: 'رسم بياني', pronunciation: 'شارت' },
+          { word: 'data', hint: 'بيانات', pronunciation: 'دايتا' },
+          { word: 'analysis', hint: 'تحليل', pronunciation: 'أناليسيس' },
+          { word: 'conclusion', hint: 'استنتاج', pronunciation: 'كونكلوجن' },
+          {
+            word: 'recommendation',
+            hint: 'توصية',
+            pronunciation: 'ريكوميندايشن',
+          },
+          { word: 'strategy', hint: 'استراتيجية', pronunciation: 'ستراتيجي' },
+          { word: 'goal', hint: 'هدف', pronunciation: 'جول' },
+          { word: 'target', hint: 'هدف مستهدف', pronunciation: 'تارجت' },
+          { word: 'progress', hint: 'تقدم', pronunciation: 'بروجرس' },
+          { word: 'achievement', hint: 'إنجاز', pronunciation: 'أشيفمنت' },
+          { word: 'challenge', hint: 'تحدي', pronunciation: 'تشالينج' },
+          { word: 'solution', hint: 'حل', pronunciation: 'سولوشن' },
+          { word: 'issue', hint: 'قضية', pronunciation: 'إيشو' },
+          { word: 'risk', hint: 'خطر', pronunciation: 'ريسك' },
+          { word: 'opportunity', hint: 'فرصة', pronunciation: 'أوبورتونيتي' },
+          { word: 'advantage', hint: 'ميزة', pronunciation: 'أدفانتج' },
+          { word: 'disadvantage', hint: 'عيب', pronunciation: 'ديسادفانتج' },
+          { word: 'strength', hint: 'قوة', pronunciation: 'سترينجث' },
+          { word: 'weakness', hint: 'ضعف', pronunciation: 'ويكنس' },
+          { word: 'market', hint: 'سوق', pronunciation: 'ماركت' },
+          { word: 'competitor', hint: 'منافس', pronunciation: 'كومبيتيتور' },
+          { word: 'product', hint: 'منتج', pronunciation: 'برودكت' },
+          { word: 'service', hint: 'خدمة', pronunciation: 'سيرفس' },
+          { word: 'quality', hint: 'جودة', pronunciation: 'كواليتي' },
+          { word: 'price', hint: 'سعر', pronunciation: 'برايس' },
+          { word: 'value', hint: 'قيمة', pronunciation: 'فاليو' },
+          { word: 'brand', hint: 'علامة تجارية', pronunciation: 'براند' },
+          { word: 'promotion', hint: 'ترويج', pronunciation: 'بروموشن' },
+          {
+            word: 'advertisement',
+            hint: 'إعلان',
+            pronunciation: 'أدفيرتايزمنت',
+          },
+          { word: 'campaign', hint: 'حملة', pronunciation: 'كامبين' },
+          { word: 'budget', hint: 'ميزانية', pronunciation: 'باجيت' },
+          { word: 'expense', hint: 'مصروف', pronunciation: 'إكسبنس' },
+          { word: 'profit', hint: 'ربح', pronunciation: 'بروفيت' },
+          { word: 'loss', hint: 'خسارة', pronunciation: 'لوس' },
+          { word: 'investment', hint: 'استثمار', pronunciation: 'إنفستمنت' },
+          { word: 'share', hint: 'سهم', pronunciation: 'شير' },
+          { word: 'stock', hint: 'مخزون', pronunciation: 'ستوك' },
+          { word: 'order', hint: 'طلب', pronunciation: 'أوردير' },
+          { word: 'supply', hint: 'إمداد', pronunciation: 'سابلاي' },
+          { word: 'demand', hint: 'طلب', pronunciation: 'ديماوند' },
+          { word: 'sale', hint: 'بيع', pronunciation: 'سيل' },
+          { word: 'purchase', hint: 'شراء', pronunciation: 'برشيس' },
+          { word: 'refund', hint: 'استرداد', pronunciation: 'ريفاند' },
+          { word: 'warranty', hint: 'ضمان', pronunciation: 'وارانتي' },
+          { word: 'complaint', hint: 'شكوى', pronunciation: 'كومبلينت' },
+          { word: 'satisfaction', hint: 'رضا', pronunciation: 'ساتيسفاكشن' },
+          { word: 'loyalty', hint: 'ولاء', pronunciation: 'لويالتي' },
+          { word: 'relationship', hint: 'علاقة', pronunciation: 'ريليشنشيب' },
+          { word: 'network', hint: 'شبكة', pronunciation: 'نتورك' },
+          { word: 'connection', hint: 'اتصال', pronunciation: 'كونكشن' },
+          { word: 'colleague', hint: 'زميل', pronunciation: 'كوليج' },
+          { word: 'supervisor', hint: 'مشرف', pronunciation: 'سوبرفايزر' },
+          { word: 'employee', hint: 'موظف', pronunciation: 'إمبلوي' },
+          { word: 'employer', hint: 'صاحب العمل', pronunciation: 'إمبلوير' },
+          { word: 'recruitment', hint: 'توظيف', pronunciation: 'ريكروتمنت' },
+          { word: 'training', hint: 'تدريب', pronunciation: 'ترينينج' },
+          { word: 'skill', hint: 'مهارة', pronunciation: 'سكيل' },
+          { word: 'experience', hint: 'خبرة', pronunciation: 'إكسبيرينس' },
+          {
+            word: 'qualification',
+            hint: 'مؤهل',
+            pronunciation: 'كواليفيكايشن',
+          },
+          { word: 'interview', hint: 'مقابلة', pronunciation: 'إنترفيو' },
+          { word: 'resume', hint: 'سيرة ذاتية', pronunciation: 'ريزيوم' },
+          { word: 'application', hint: 'طلب', pronunciation: 'أبليكايشن' },
+          { word: 'position', hint: 'منصب', pronunciation: 'بوزيشن' },
+          { word: 'salary', hint: 'راتب', pronunciation: 'سالاري' },
+          { word: 'benefit', hint: 'ميزة', pronunciation: 'بينيفيت' },
+          { word: 'promotion', hint: 'ترقية', pronunciation: 'بروموشن' },
+          { word: 'transfer', hint: 'نقل', pronunciation: 'ترانسفير' },
+          { word: 'retirement', hint: 'تقاعد', pronunciation: 'ريتايرمنت' },
+        ];
+
+        // تهيئة التطبيق
+        initWord();
+
+        // التعامل مع ضغطات المفاتيح
+        $(document).keydown(function (e) {
+          if (e.key.length === 1 || e.key === 'Backspace') {
+            handleKeyPress(e.key);
+          }
+        });
+
+        // تحميل ملف Excel
+        $('#excel-file').change(function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            $('.file-name').text(file.name);
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                  header: 1,
+                });
+
+                words = [];
+                for (let i = 1; i < jsonData.length; i++) {
+                  if (jsonData[i][0] && jsonData[i][1] && jsonData[i][2]) {
+                    words.push({
+                      word: jsonData[i][0].toString().toLowerCase().trim(),
+                      hint: jsonData[i][1].toString().trim(),
+                      pronunciation: jsonData[i][2].toString().trim(),
+                    });
+                  }
+                }
+
+                if (words.length > 0) {
+                  currentWordIndex = 0;
+                  initWord();
+                  console.log(JSON.stringify(words));
+                  alert(`تم تحميل ${words.length} كلمة بنجاح!`);
+                } else {
+                  alert(
+                    'لم يتم العثور على كلمات في الملف. تأكد من تنسيق الملف.'
+                  );
+                }
+              } catch (error) {
+                alert('حدث خطأ أثناء قراءة الملف. تأكد من أن الملف صحيح.');
+                console.error('File reading error:', error);
+              }
+            };
+            reader.onerror = function () {
+              alert('حدث خطأ أثناء قراءة الملف.');
+            };
+            reader.readAsArrayBuffer(file);
+          }
+        });
+
+        function initWord() {
+          if (words.length === 0) {
+            $('.word-display').text('لا توجد كلمات');
+            $('.hint').text('تلميح: ---');
+            $('.pronunciation').text('نطق: ---');
+            $('.progress').text('كلمة 0 من 0');
+            $('.cells-container').empty();
+            return;
+          }
+
+          // التأكد من أن currentWordIndex ضمن النطاق الصحيح
+          if (currentWordIndex >= words.length) {
+            currentWordIndex = 0;
+          }
+
+          currentWord = words[currentWordIndex].word.toLowerCase();
+          currentAttempt = 0;
+          currentPosition = 0;
+          completedRows = 0;
+
+          $('.word-display').text(currentWord.toLowerCase());
+          $('.hint').text('تلميح: ' + words[currentWordIndex].hint);
+          $('.pronunciation').text(
+            'نطق: ' + words[currentWordIndex].pronunciation
+          );
+          $('.progress').text(
+            `كلمة ${currentWordIndex + 1} من ${words.length}`
+          );
+          $('.success-message').text('');
+
+          $('.cells-container').empty();
+          for (let i = 0; i < maxAttempts; i++) {
+            const row = $('<div>').addClass('cell-row');
+            for (let j = 0; j < currentWord.length; j++) {
+              const cell = $('<div>').addClass('cell');
+              if (i === 0) {
+                cell.addClass('hint-char').text(currentWord[j]);
+              }
+              row.append(cell);
+            }
+            $('.cells-container').append(row);
+          }
+
+          setActiveCell();
+
+          // التمرير إلى بداية الخلايا عند تحميل كلمة جديدة
+          $('html, body').animate(
+            {
+              scrollTop: $('.progress').offset().top - 20,
+            },
+            500
+          );
+        }
+
+        function handleKeyPress(key) {
+          if (currentAttempt >= maxAttempts || words.length === 0) return;
+
+          const currentRow = $(`.cell-row:eq(${currentAttempt}) .cell`);
+
+          if (key === 'Backspace') {
+            if (currentPosition > 0) {
+              currentPosition--;
+              currentRow
+                .eq(currentPosition)
+                .removeClass('correct incorrect')
+                .text('');
+            }
+          } else {
+            if (currentPosition < currentWord.length) {
+              const currentChar = currentWord[currentPosition];
+              const cell = currentRow.eq(currentPosition);
+
+              cell.text(key);
+
+              if (key.toLowerCase() === currentChar) {
+                cell.removeClass('hint-char incorrect').addClass('correct');
+                currentPosition++;
+
+                if (currentPosition === currentWord.length) {
+                  completedRows++;
+                  currentRow.addClass('completed');
+
+                  if (completedRows >= maxAttempts) {
+                    $('.success-message').text(
+                      '✓ لقد أكملت جميع المحاولات بنجاح!'
+                    );
+                    setTimeout(() => {
+                      currentWordIndex++;
+                      if (currentWordIndex >= words.length) {
+                        currentWordIndex = 0;
+                        alert('تهانينا! لقد أكملت جميع الكلمات!');
+                      }
+                      initWord();
+                    }, 1000);
+                  } else {
+                    currentAttempt++;
+                    currentPosition = 0;
+                    setActiveCell();
+                    const rowElement = $(`.cell-row:eq(${currentAttempt})`);
+                    $('html, body').animate(
+                      { scrollTop: rowElement.offset().top - 100 },
+                      500
+                    );
+                  }
+                }
+              } else {
+                cell.removeClass('hint-char correct').addClass('incorrect');
+              }
+
+              setActiveCell();
+            }
+          }
+        }
+
+        function setActiveCell() {
+          $('.cell').removeClass('active');
+
+          if (
+            currentAttempt < maxAttempts &&
+            currentPosition < currentWord.length
+          ) {
+            $(
+              `.cell-row:eq(${currentAttempt}) .cell:eq(${currentPosition})`
+            ).addClass('active');
+          }
+        }
+      });
+    </script>
+    <footer>✅ <span>تم بحمد الله</span></footer>
+  </body>
+</html>
