@@ -1,3 +1,16 @@
+
+const hiddenInput = document.getElementById("hiddenInput");
+
+// إذا كان الجهاز موبايل، ركز على الحقل المخفي لفتح الكيبورد
+if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+  hiddenInput.focus();
+
+  // إعادة التركيز في حال فقد
+  hiddenInput.addEventListener("blur", () => {
+    setTimeout(() => hiddenInput.focus(), 500);
+  });
+}
+
 (function (_0x3f67ca, _0x67dc6d) {
   const _0x3fa349 = _0x5b6b,
     _0x52f7a8 = _0x3f67ca();
@@ -1318,21 +1331,4 @@ function _0x3f20() {
   return _0x3f20();
 }
 
-// تشغيل لوحة المفاتيح على الموبايل
-$(document).ready(function () {
-  const input = document.getElementById("mobileInput");
-  input.focus();
 
-  // التحقق أن المستخدم على هاتف
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
-    input.focus();
-  }
-
-  // جعل المستخدم يعيد التركيز إن فقده
-  input.addEventListener("blur", () => {
-    setTimeout(() => input.focus(), 100);
-  });
-
-  // التمرير كي لا يظهر حقل الإدخال
-  window.scrollTo(0, 1);
-});
